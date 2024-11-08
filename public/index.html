@@ -5,26 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Basic styles for emoji picker */
+        .emoji-picker {
+            display: none;
+            position: absolute;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            z-index: 10;
+            padding: 10px;
+        }
+        .emoji {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
 <div id="chat">
     <ul id="messages"></ul>
     <form id="form" action="">
         <input id="input" autocomplete="off" placeholder="Type your message here..." />
-<!-- make specific types of images allow to send -->
-        <input type="file" id="fileInput" accept=".jpg, .jpeg, .png, .gif" />
+        <input type="file" id="fileInput" accept="image/*" />
         <button>Send</button>
+        <button type="button" id="emojiButton">😀</button> <!-- Button to toggle emoji picker -->
+        <div id="emojiPicker" class="emoji-picker">
+            <span class="emoji">😀</span>
+            <span class="emoji">😂</span>
+            <span class="emoji">😍</span>
+            <span class="emoji">😢</span>
+            <span class="emoji">😎</span>
+            <span class="emoji">😡</span>
+            <span class="emoji">🥳</span>
+            <span class="emoji">🙌</span>
+            <!-- Add more emojis as needed -->
+        </div>
     </form>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
-    let username = prompt("What's your name?"); // Ask for the user's name
+    let username = prompt("What's your name?");
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const fileInput = document.getElementById('fileInput');
     const messages = document.getElementById('messages');
+    const emojiButton = document.getElementById('emojiButton');
+    const emojiPicker = document.getElementById('emojiPicker');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -37,32 +66,44 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onloadend = function() {
-                    data.image = reader.result; // Get base64 string of the image
-                    socket.emit('chat message', data); // Send message with image
-                    fileInput.value = ''; // Clear file input
+                    data.image = reader.result;
+                    socket.emit('chat message', data);
+                    fileInput.value = '';
                 };
-                reader.readAsDataURL(file); // Convert image file to base64
+                reader.readAsDataURL(file);
             } else {
-                socket.emit('chat message', data); // Send message without image
+                socket.emit('chat message', data);
             }
 
-            input.value = ''; // Clear message input
+            input.value = '';
         }
     });
 
     socket.on('chat message', function(data) {
         const item = document.createElement('li');
-        item.textContent = `${data.user}: ${data.message || ''}`; // Display user name with message
+        item.innerHTML = `${data.user}: ${data.message || ''}`; // Use innerHTML to support emojis
 
         if (data.image) {
             const img = document.createElement('img');
-            img.src = data.image; // Set image source to the base64 string
-            img.style.maxWidth = '200px'; // Optional: set max width for images
-            item.appendChild(img); // Add image to the message
+            img.src = data.image;
+            img.style.maxWidth = '200px';
+            item.appendChild(img);
         }
 
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    // Toggle emoji picker visibility
+    emojiButton.addEventListener('click', function() {
+        emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Add emoji to input field
+    emojiPicker.addEventListener('click', function(e) {
+        if (e.target.classList.contains('emoji')) {
+            input.value += e.target.innerText; // Append emoji to input
+        }
     });
 </script>
 </body>
