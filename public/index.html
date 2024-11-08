@@ -9,7 +9,7 @@
         /* Basic styles for emoji picker */
         .emoji-picker {
             display: none;
-            position: absolute;
+            position: absolute; /* Change to absolute to position it correctly */
             border: 1px solid #ccc;
             background-color: #fff;
             z-index: 10;
@@ -19,6 +19,12 @@
             cursor: pointer;
             padding: 5px;
             font-size: 24px;
+        }
+        #emojiButton {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -76,6 +82,7 @@
             }
 
             input.value = '';
+            emojiPicker.style.display = 'none'; // Hide emoji picker after sending a message
         }
     });
 
@@ -99,10 +106,18 @@
         emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Add emoji to input field
+    // Add emoji to input field and hide the picker
     emojiPicker.addEventListener('click', function(e) {
         if (e.target.classList.contains('emoji')) {
             input.value += e.target.innerText; // Append emoji to input
+            emojiPicker.style.display = 'none'; // Hide emoji picker after selection
+        }
+    });
+
+    // Close emoji picker if clicking outside
+    document.addEventListener('click', function(e) {
+        if (!emojiButton.contains(e.target) && !emojiPicker.contains(e.target)) {
+            emojiPicker.style.display = 'none';
         }
     });
 </script>
