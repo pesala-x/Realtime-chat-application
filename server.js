@@ -1,26 +1,38 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new Server(server);
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+io.on("connection", (socket) => {
+    const username = socket.handshake.query.username;
 
-    socket.on('chat message', (data) => {
-        io.emit('chat message', data); // Broadcast the message object to all clients
+    io.emit("user connected", username);
+
+    socket.on("send message", (data) => {
+        io.emit("receive message", { ...data, delivered: true });
     });
 
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
+    socket.on("user typing", (username) => {
+        socket.broadcast.emit("show typing", username);
+    });
+
+    socket.on("user stopped typing", () => {
+        socket.broadcast.emit("hide typing");
+    });
+
+    socket.on("add reaction", (data) => {
+        io.emit("reaction added", data);
+    });
+
+    socket.on("disconnect", () => {
+        io.emit("user disconnected", username);
     });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+server.listen(3000, () => {
+    console.log("Server is running on http://localhost:3000");
 });

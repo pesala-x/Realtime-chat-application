@@ -1,0 +1,42 @@
+/* Additional styles for sender name, audio, and video buttons */
+
+.message-sender {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+#input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #333;
+    background-color: #111;
+}
+
+#input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background-color: #333;
+    color: #e1e1e1;
+    outline: none;
+    font-size: 1em;
+    margin-right: 10px;
+}
+
+#send-button, #audio-button, #video-button {
+    padding: 8px;
+    background-color: #075e54;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 1.2em;
+}
+
+#send-button:hover, #audio-button:hover, #video-button:hover {
+    background-color: #0a8d71;
+}

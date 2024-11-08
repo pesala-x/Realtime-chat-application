@@ -3,168 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* Basic styles for emoji picker */
-        .emoji-picker {
-            display: none;
-            position: absolute;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            z-index: 10;
-            padding: 10px;
-        }
-        .emoji {
-            cursor: pointer;
-            padding: 5px;
-            font-size: 24px;
-        }
-        #emojiButton {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        /* Styles for audio messages */
-        audio {
-            display: block;
-            margin-top: 5px;
-        }
-    </style>
+    <title>WhatsApp-like Chat App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="chat">
+<div id="chat-container">
+    <div id="status">Welcome to the chat!</div>
     <ul id="messages"></ul>
-    <form id="form" action="">
-        <input id="input" autocomplete="off" placeholder="Type your message here..." />
-        <input type="file" id="fileInput" accept="image/*" />
-        <button>Send</button>
-        <button type="button" id="emojiButton">😀</button>
-        <div id="emojiPicker" class="emoji-picker">
-            <span class="emoji">😀</span>
-            <span class="emoji">😂</span>
-            <span class="emoji">😍</span>
-            <span class="emoji">😢</span>
-            <span class="emoji">😎</span>
-            <span class="emoji">😡</span>
-            <span class="emoji">🥳</span>
-            <span class="emoji">🙌</span>
-            <span class="emoji">🤌</span>
-            <span class="emoji">👍</span>
-            <span class="emoji">👎</span>
-            <span class="emoji">🖕</span>
-
-            <!-- Add more emojis as needed -->
-        </div>
-        <button type="button" id="recordButton">🎙️</button> <!-- Button to record audio -->
-    </form>
+    <div id="input-container">
+        <input id="input" placeholder="Type a message..." autocomplete="off">
+        <button id="audio-button">🎤</button> <!-- Audio Record Button -->
+        <button id="video-button">📹</button> <!-- Video Call Button -->
+        <button id="send-button">➤</button> <!-- Send Message Button -->
+    </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
-    let username = prompt("What's your name?");
-    let mediaRecorder;
-    let audioChunks = [];
-
-    const form = document.getElementById('form');
-    const input = document.getElementById('input');
-    const fileInput = document.getElementById('fileInput');
-    const messages = document.getElementById('messages');
-    const emojiButton = document.getElementById('emojiButton');
-    const emojiPicker = document.getElementById('emojiPicker');
-    const recordButton = document.getElementById('recordButton');
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const message = input.value;
-        const file = fileInput.files[0];
-
-        if (message || file) {
-            const data = { user: username, message };
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = function() {
-                    data.image = reader.result;
-                    socket.emit('chat message', data);
-                    fileInput.value = '';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                socket.emit('chat message', data);
-            }
-
-            input.value = '';
-            emojiPicker.style.display = 'none'; // Hide emoji picker after sending a message
-        }
-    });
-
-    socket.on('chat message', function(data) {
-        const item = document.createElement('li');
-        item.innerHTML = `${data.user}: ${data.message || ''}`; // Use innerHTML to support emojis
-
-        if (data.image) {
-            const img = document.createElement('img');
-            img.src = data.image;
-            img.style.maxWidth = '200px';
-            item.appendChild(img);
-        }
-
-        if (data.audio) {
-            const audio = document.createElement('audio');
-            audio.src = data.audio;
-            audio.controls = true; // Show audio controls
-            item.appendChild(audio);
-        }
-
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-
-    // Toggle emoji picker visibility
-    emojiButton.addEventListener('click', function() {
-        emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
-    });
-
-    // Add emoji to input field and hide the picker
-    emojiPicker.addEventListener('click', function(e) {
-        if (e.target.classList.contains('emoji')) {
-            input.value += e.target.innerText; // Append emoji to input
-            emojiPicker.style.display = 'none'; // Hide emoji picker after selection
-        }
-    });
-
-    // Close emoji picker if clicking outside
-    document.addEventListener('click', function(e) {
-        if (!emojiButton.contains(e.target) && !emojiPicker.contains(e.target)) {
-            emojiPicker.style.display = 'none';
-        }
-    });
-
-    // Record audio
-    recordButton.addEventListener('click', async () => {
-        if (mediaRecorder && mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
-            recordButton.textContent = '🎙️'; // Change button text to start recording
-        } else {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            recordButton.textContent = '⏹️'; // Change button text to stop recording
-
-            mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                socket.emit('chat message', { user: username, audio: audioUrl });
-                audioChunks = []; // Clear audio chunks after sending
-            };
-        }
-    });
-</script>
+<script src="script.js"></script>
 </body>
 </html>
