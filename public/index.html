@@ -11,6 +11,8 @@
     <ul id="messages"></ul>
     <form id="form" action="">
         <input id="input" autocomplete="off" placeholder="Type your message here..." />
+<!-- make specific types of images allow to send -->
+        <input type="file" id="fileInput" accept=".jpg, .jpeg, .png, .gif" />
         <button>Send</button>
     </form>
 </div>
@@ -21,19 +23,44 @@
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
+    const fileInput = document.getElementById('fileInput');
     const messages = document.getElementById('messages');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (input.value) {
-            socket.emit('chat message', { user: username, message: input.value }); // Send both name and message
-            input.value = '';
+        const message = input.value;
+        const file = fileInput.files[0];
+
+        if (message || file) {
+            const data = { user: username, message };
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    data.image = reader.result; // Get base64 string of the image
+                    socket.emit('chat message', data); // Send message with image
+                    fileInput.value = ''; // Clear file input
+                };
+                reader.readAsDataURL(file); // Convert image file to base64
+            } else {
+                socket.emit('chat message', data); // Send message without image
+            }
+
+            input.value = ''; // Clear message input
         }
     });
 
     socket.on('chat message', function(data) {
         const item = document.createElement('li');
-        item.textContent = `${data.user}: ${data.message}`; // Display user name with message
+        item.textContent = `${data.user}: ${data.message || ''}`; // Display user name with message
+
+        if (data.image) {
+            const img = document.createElement('img');
+            img.src = data.image; // Set image source to the base64 string
+            img.style.maxWidth = '200px'; // Optional: set max width for images
+            item.appendChild(img); // Add image to the message
+        }
+
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
     });

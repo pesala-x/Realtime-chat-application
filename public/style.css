@@ -34,3 +34,9 @@ input {
     flex: 1;
     padding: 10px;
 }
+
+img {
+    max-width: 200px; /* Control image size */
+    border-radius: 5px; /* Optional: add some border radius */
+    margin-top: 5px; /* Optional: add space above the image */
+}
