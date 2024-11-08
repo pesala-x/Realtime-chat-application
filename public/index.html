@@ -57,7 +57,7 @@
 
             <!-- Add more emojis as needed -->
         </div>
-        <button type="button" id="recordButton">🎤</button> <!-- Button to record audio -->
+        <button type="button" id="recordButton">🎙️</button> <!-- Button to record audio -->
     </form>
 </div>
 <script src="/socket.io/socket.io.js"></script>
@@ -146,7 +146,7 @@
     recordButton.addEventListener('click', async () => {
         if (mediaRecorder && mediaRecorder.state === "recording") {
             mediaRecorder.stop();
-            recordButton.textContent = '🎤'; // Change button text to start recording
+            recordButton.textContent = '🎙️'; // Change button text to start recording
         } else {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
