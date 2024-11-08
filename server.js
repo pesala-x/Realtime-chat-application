@@ -11,8 +11,8 @@ app.use(express.static('public'));
 io.on('connection', (socket) => {
     console.log('A user connected');
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg); // Broadcast the message to all clients
+    socket.on('chat message', (data) => {
+        io.emit('chat message', data); // Broadcast the message object to all clients
     });
 
     socket.on('disconnect', () => {

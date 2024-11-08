@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div id="chat">
     <ul id="messages"></ul>
     <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+        <input id="input" autocomplete="off" placeholder="Type your message here..." />
+        <button>Send</button>
     </form>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
+    let username = prompt("What's your name?"); // Ask for the user's name
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
@@ -24,14 +26,14 @@
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input.value) {
-            socket.emit('chat message', input.value);
+            socket.emit('chat message', { user: username, message: input.value }); // Send both name and message
             input.value = '';
         }
     });
 
-    socket.on('chat message', function(msg) {
+    socket.on('chat message', function(data) {
         const item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = `${data.user}: ${data.message}`; // Display user name with message
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
     });
